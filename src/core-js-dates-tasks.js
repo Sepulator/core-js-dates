@@ -274,7 +274,7 @@ function getWorkSchedule(period, countWorkDays, countOffDays) {
     return new Date(year, month - 1, day);
   };
 
-  const getDate = (date) => {
+  const formatterDate = (date) => {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
@@ -283,21 +283,28 @@ function getWorkSchedule(period, countWorkDays, countOffDays) {
 
   const startDate = parseDate(period.start);
   const endDate = parseDate(period.end);
-  const currentDate = new Date(startDate);
+  const currDate = new Date(startDate);
+
+  let isWorkDay = true;
+  let workCounter = 0;
+
+  while (currDate <= endDate) {
+    if (isWorkDay) {
+      schedule.push(formatterDate(currDate));
+      currDate.setDate(currDate.getDate() + 1);
+      workCounter += 1;
+      if (workCounter === countWorkDays) {
+        isWorkDay = false;
+        workCounter = 0;
+      }
+    } else {
+      currDate.setDate(currDate.getDate() + countOffDays);
+      isWorkDay = true;
+    }
+  }
 
   return schedule;
 }
-
-// console.log(
-//   getWorkSchedule({ start: '01-01-2024', end: '15-01-2024' }, 1, 3),
-//   '==>',
-//   ['01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024']
-// );
-// console.log(
-//   getWorkSchedule({ start: '01-01-2024', end: '10-01-2024' }, 1, 1),
-//   '==>',
-//   ['01-01-2024', '03-01-2024', '05-01-2024', '07-01-2024', '09-01-2024']
-// );
 
 /**
  * Determines whether the year in the provided date is a leap year.
