@@ -219,19 +219,18 @@ function getWeekNumberByDate(date) {
  * Date(2023, 1, 1) => Date(2023, 9, 13)
  */
 function getNextFridayThe13th(date) {
-  let nextMonth;
-  let month = date.getMonth();
-
-  if (date.getDay() > 13) month += 1;
-
-  for (let i = month; i < 9 + month; i += 1) {
-    nextMonth = new Date(date);
-    nextMonth.setMonth(nextMonth.getMonth() + i);
-    nextMonth.setDate(13);
-    if (nextMonth.getDay() === 5) return nextMonth;
+  const currDate = new Date(date.valueOf());
+  if (currDate.getDate() > 13) currDate.setMonth(currDate.getMonth() + 1);
+  currDate.setDate(13);
+  const checkFriday = () =>
+    currDate.getDay() === 5 && currDate.getDate() === 13;
+  let isFriday = checkFriday();
+  while (!isFriday) {
+    currDate.setMonth(currDate.getMonth() + 1);
+    isFriday = checkFriday();
   }
 
-  return nextMonth;
+  return currDate;
 }
 
 /**
@@ -245,8 +244,8 @@ function getNextFridayThe13th(date) {
  * Date(2024, 5, 1) => 2
  * Date(2024, 10, 10) => 4
  */
-function getQuarter(/* date */) {
-  throw new Error('Not implemented');
+function getQuarter(date) {
+  return Math.floor(date.getMonth() / 3) + 1;
 }
 
 /**
@@ -267,9 +266,38 @@ function getQuarter(/* date */) {
  * { start: '01-01-2024', end: '15-01-2024' }, 1, 3 => ['01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024']
  * { start: '01-01-2024', end: '10-01-2024' }, 1, 1 => ['01-01-2024', '03-01-2024', '05-01-2024', '07-01-2024', '09-01-2024']
  */
-function getWorkSchedule(/* period, countWorkDays, countOffDays */) {
-  throw new Error('Not implemented');
+function getWorkSchedule(period, countWorkDays, countOffDays) {
+  const schedule = [];
+
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const getDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const startDate = parseDate(period.start);
+  const endDate = parseDate(period.end);
+  const currentDate = new Date(startDate);
+
+  return schedule;
 }
+
+// console.log(
+//   getWorkSchedule({ start: '01-01-2024', end: '15-01-2024' }, 1, 3),
+//   '==>',
+//   ['01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024']
+// );
+// console.log(
+//   getWorkSchedule({ start: '01-01-2024', end: '10-01-2024' }, 1, 1),
+//   '==>',
+//   ['01-01-2024', '03-01-2024', '05-01-2024', '07-01-2024', '09-01-2024']
+// );
 
 /**
  * Determines whether the year in the provided date is a leap year.
