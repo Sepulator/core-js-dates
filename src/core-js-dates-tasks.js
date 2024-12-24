@@ -170,9 +170,12 @@ function formatDate(date) {
  * 1, 2024 => 8
  */
 function getCountWeekendsInMonth(month, year) {
-  return new Array(new Date(year, month, 0).getDate());
+  const length = new Date(year, month, 0).getDate();
+  return Array.from({ length }).reduce((acc, _, i) => {
+    const date = new Date(year, month - 1, i + 1);
+    return date.getDay() === 0 || date.getDay() === 6 ? acc + 1 : acc;
+  }, 0);
 }
-console.log(getCountWeekendsInMonth(12, 2024));
 
 /**
  * Returns the week number of the year for a given date.
@@ -187,8 +190,21 @@ console.log(getCountWeekendsInMonth(12, 2024));
  * Date(2024, 0, 31) => 5
  * Date(2024, 1, 23) => 8
  */
-function getWeekNumberByDate(/* date */) {
-  throw new Error('Not implemented');
+function getWeekNumberByDate(date) {
+  const target = new Date(date.valueOf());
+
+  const dayNumber = (date.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNumber + 3);
+
+  const timestamp = target.valueOf();
+
+  target.setMonth(0, 1);
+
+  if (target.getDay() !== 4)
+    target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+
+  const oneWeekInMilliseconds = 24 * 60 * 60 * 1000 * 7;
+  return 1 + Math.ceil((timestamp - target.valueOf()) / oneWeekInMilliseconds);
 }
 
 /**
@@ -202,8 +218,20 @@ function getWeekNumberByDate(/* date */) {
  * Date(2024, 0, 13) => Date(2024, 8, 13)
  * Date(2023, 1, 1) => Date(2023, 9, 13)
  */
-function getNextFridayThe13th(/* date */) {
-  throw new Error('Not implemented');
+function getNextFridayThe13th(date) {
+  let nextMonth;
+  let month = date.getMonth();
+
+  if (date.getDay() > 13) month += 1;
+
+  for (let i = month; i < 9 + month; i += 1) {
+    nextMonth = new Date(date);
+    nextMonth.setMonth(nextMonth.getMonth() + i);
+    nextMonth.setDate(13);
+    if (nextMonth.getDay() === 5) return nextMonth;
+  }
+
+  return nextMonth;
 }
 
 /**
